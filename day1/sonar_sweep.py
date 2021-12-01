@@ -32,4 +32,4 @@ file_name: str = "sonar_sweep_input"
 window_size: int = 3
 count = calculate_increments(window_size, file_name)
 
-print(f"The depth measurement icreases {count} times")
+print(f"The depth measurement increases {count} times")
