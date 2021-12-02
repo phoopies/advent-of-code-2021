@@ -14,7 +14,7 @@ def next_window(arr: List[int], a: int) -> List[int]:
     new_arr.append(a)
     return new_arr
 
-def calculate_increments(window_size: int = 3, file_name: str = "sonar_sweep_input") -> int:
+def solve(window_size: int = 3, file_name: str = "input") -> int:
     count: int = 0
     with open(f"day1/{file_name}", 'r') as f:
         prev = []
@@ -27,9 +27,8 @@ def calculate_increments(window_size: int = 3, file_name: str = "sonar_sweep_inp
             prev = current
     return count
 
-
-file_name: str = "sonar_sweep_input"
+file_name: str = "input"
 window_size: int = 3
-count = calculate_increments(window_size, file_name)
+count = solve(window_size, file_name)
 
 print(f"The depth measurement increases {count} times")

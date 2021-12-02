@@ -12,13 +12,15 @@ class Position:
     def __init__(self) -> None:
         self.horizontal: int = 0
         self.depth: int = 0
+        self.aim: int = 0
     
     def __str__(self) -> str:
         return f"x: {self.horizontal}\ty: {self.depth}"
     
     def move(self, direction: Direction, amount: int) -> None:
         self.horizontal += direction.value[0] * amount
-        self.depth -= direction.value[1] * amount
+        self.depth += direction.value[0] * self.aim * amount
+        self.aim -= direction.value[1] * amount
     
     def move_str(self, s: str) -> None:
         arr = s.split()
@@ -32,10 +34,13 @@ class Position:
     def product(self) -> int:
         return self.horizontal * self.depth
 
-pos: Position = Position()
-with open(f"day2/input", 'r') as f:
-    while c := f.readline():
-        pos.move_str(c)
+def solve(filename: str = "input") -> Tuple[int, Position]:
+    pos: Position = Position()
+    with open(f"day2/input", 'r') as f:
+        while c := f.readline():
+            pos.move_str(c)
+    return pos.product(), pos
 
+solution, pos  = solve()
 print(pos)
-print(pos.product())
+print(solution)
