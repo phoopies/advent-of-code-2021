@@ -1,5 +1,4 @@
 from enum import Enum
-from os import EX_PROTOCOL
 from typing import List, Tuple, Union
 
 class Bit(Enum):
@@ -25,6 +24,9 @@ class Byte:
     
     def __getitem__(self, key:int):
         return self.byte[key]
+    
+    def __len__(self) -> int:
+        return len(self.byte)
     
     def inverted(self):
         byte = self.byte.copy()
@@ -62,7 +64,8 @@ class BitCount:
         if i not in [0,1]: return
         self.add(Bit(i))
     
-    def most_common(self) -> Bit:
+    def most_common(self, default:int = 1) -> Bit:
+        if self.zeros == self.ones: return Bit(default)
         return Bit(self.zeros < self.ones)
 
 class BitCounts:
@@ -74,6 +77,7 @@ class BitCounts:
         self.dirty = False
     
     def __str__(self) -> str:
+        self.get_gamma_rate()
         return (
             "zeros: " + "".join([f'{count.zeros} ' for count in self.counts]) +
             "\nones: " + "".join([f'{count.ones} ' for count in self.counts]) +
@@ -81,9 +85,13 @@ class BitCounts:
             f"\nepsilon rate: {str(self.epsilon_rate)}={self.epsilon_rate.as_int()}"
         )
     
-    def add(self, i:int, b:Bit):
-        self.counts[i].add(b)
+    def add(self, i:int, bit:Bit):
+        self.counts[i].add(bit)
         self.dirty = True
+    
+    def add_byte(self, byte: Byte):
+        if len(byte) > len(self.counts): return
+        for i, bit in enumerate(byte): self.add(i, bit)
     
     def add_str(self, s:str):
         if len(s) > len(self.counts): return
@@ -91,19 +99,18 @@ class BitCounts:
             self.counts[i].add_str(c)
         self.dirty = True
     
-    def get_gamma_rate(self) -> int:
-        if not self.dirty: return self.gamma_rate.as_int()
-        self.gamma_rate = Byte()
-        for count in self.counts:
-            self.gamma_rate.append(count.most_common())
+    def get_gamma_rate(self) -> Byte:
+        if not self.dirty: return self.gamma_rate
+        for i, count in enumerate(self.counts):
+            self.gamma_rate[i] = count.most_common()
         self.epsilon_rate = self.gamma_rate.inverted()
         self.dirty = False
-        return self.gamma_rate.as_int()
+        return self.gamma_rate
 
-    def get_epsilon_rate(self) -> int:
-        if not self.dirty: return self.epsilon_rate.as_int()
+    def get_epsilon_rate(self) -> Byte:
+        if not self.dirty: return self.epsilon_rate
         self.get_gamma_rate()
-        return self.epsilon_rate.as_int()
+        return self.epsilon_rate
         
 
 def solve(filename: str = "input") -> Tuple[int, BitCounts]:
@@ -113,10 +120,10 @@ def solve(filename: str = "input") -> Tuple[int, BitCounts]:
         counts.add_str(line)
         while line := f.readline().strip():
             counts.add_str(line)
-    return counts.get_gamma_rate() * counts.get_epsilon_rate(), counts
+    return counts.get_gamma_rate().as_int() * counts.get_epsilon_rate().as_int(), counts
 
+if __name__ == "__main__":
+    result, counts = solve("test_data")
 
-result, counts = solve()
-
-print(str(counts))
-print(f"Delta epsilon product is {result}")
+    print(str(counts))
+    print(f"Delta epsilon product is {result}")
