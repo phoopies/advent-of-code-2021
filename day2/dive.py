@@ -36,7 +36,7 @@ class Position:
 
 def solve(filename: str = "input") -> Tuple[int, Position]:
     pos: Position = Position()
-    with open(f"day2/input", 'r') as f:
+    with open(f"day2/{filename}", 'r') as f:
         while c := f.readline():
             pos.move_str(c)
     return pos.product(), pos
