@@ -123,7 +123,7 @@ def solve(filename: str = "input") -> Tuple[int, BitCounts]:
     return counts.get_gamma_rate().as_int() * counts.get_epsilon_rate().as_int(), counts
 
 if __name__ == "__main__":
-    result, counts = solve("test_data")
+    result, counts = solve()
 
     print(str(counts))
     print(f"Delta epsilon product is {result}")
