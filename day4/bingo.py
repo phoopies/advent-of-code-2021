@@ -1,7 +1,5 @@
 from typing import List, Tuple, Union
-
-
-from colorama import Fore, Style
+from colorama import Style
 
 def colorize(s:str, color) -> str:
     return color + s + Style.RESET_ALL
@@ -86,9 +84,9 @@ def parse_numbers(s:str, sep:str) -> List[int]:
     numbers = [int(value) for value in values if value.isdigit()]
     return numbers
 
-def solve(filename: str = "input") -> Tuple[int, List[Bingo]]:
-    boards: List[Bingo] = []
+def get_input(filename: str = "input") -> Tuple[List[int], List[Bingo]]:
     numbers: List[int] = []
+    boards: List[Bingo] = []
     with open(f"day4/{filename}", 'r') as f:
         line = f.readline().strip()
         numbers = parse_numbers(line, ',')
@@ -98,11 +96,35 @@ def solve(filename: str = "input") -> Tuple[int, List[Bingo]]:
                 boards.append(Bingo())
             row = parse_numbers(line, ' ')
             boards[-1].add_row(row)
+    return numbers, boards
+
+def winners(number: int, boards: List[Bingo]) -> List[Bingo]:
+    round_winners: List[Bingo] = []
+    for board in boards:
+        board.mark(number)
+        if board.won(): round_winners.append(board)
+    return round_winners
+
+def winner(numbers: List[int], boards: List[Bingo], first:bool = True) -> Tuple[int, Bingo]:
     for number in numbers:
-        for board in boards:
-            board.mark(number)
-            if board.won(): return board.sum_unmarked() * number, boards, board
-    return -1, []
+        round_winners = winners(number, boards)
+        if len(round_winners) > 0:
+            if first: return number, round_winners[0] # return the board that won first
+            for round_winner in round_winners: boards.remove(round_winner) # remove all winners
+            if len(boards) == 0: return number, round_winners[-1] # If all removed return the last winner of current round
+    return -1, Bingo()
+
+def first_winner(numbers: List[int], boards: List[Bingo]) -> Tuple[int, Bingo]:
+    return winner(numbers, boards, True)
+
+def last_winner(numbers: List[int], boards: List[Bingo]) -> Tuple[int, Bingo]:
+    return winner(numbers, boards, False)
+
+def solve(part_two = False, filename: str = "input"):
+    numbers, boards = get_input(filename)
+    last_number, board = last_winner(numbers, boards) if part_two else first_winner(numbers, boards)
+    return last_number * board.sum_unmarked(), board
+
 
 if __name__ == "__main__":
     # test_board = Bingo([[1,2,3], [4,5,6], [7,8,9]])
@@ -114,9 +136,7 @@ if __name__ == "__main__":
     # test_board.mark(7)
     # print(test_board)
     # print(test_board.won())
-    result, boards, winning_board = solve()
-    for board in boards: print(str(board)+"\n")
-    print("*"*50)
-    print(winning_board)
+    result, board = solve(True)
+    print(board)
     print("*"*50)
     print(f"result is {result}")
