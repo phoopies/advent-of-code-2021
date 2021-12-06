@@ -1,12 +1,16 @@
-from typing import List, Union
+from typing import List
 
-def simulate(initial_fishes: List[int], days: int):
-    return sum([simulate_fish(fish, days) for fish in initial_fishes])
-
-def simulate_fish(fish: int, days: int):
-    if fish >= days: return 1 # the fish doesn't have time to reproduce, return itself
-    remaining_days = days - fish - 1
-    return simulate_fish(6, remaining_days) + simulate_fish(8, remaining_days) # reproduces one fish and then the remaining days for itself and the reproduced fish
+def simulate(initial_values: List[int], days: int = 256, days_to_reproduce: int = 6, days_to_reproduce_first_time: int = 8) -> int:
+    fishes = [0] * (days_to_reproduce_first_time + 1)
+    for initial_value in initial_values: fishes[initial_value] += 1
+    for _day in range(days):
+        to_reproduce = fishes[0]
+        for i in range(0, days_to_reproduce_first_time):
+            fishes[i] = fishes[i+1]
+        fishes[-1] = 0
+        fishes[days_to_reproduce] += to_reproduce
+        fishes[days_to_reproduce_first_time] += to_reproduce
+    return sum(fishes)
 
 def solve(filename: str = "input", days: int = 256) -> int:
     values = []
@@ -18,5 +22,5 @@ def solve(filename: str = "input", days: int = 256) -> int:
     return fishes
 
 if __name__ == "__main__":
-    result = solve("test_data")
+    result = solve()
     print(result)
