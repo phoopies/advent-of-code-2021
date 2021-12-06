@@ -1,42 +1,22 @@
 from typing import List, Union
 
+def simulate(initial_fishes: List[int], days: int):
+    return sum([simulate_fish(fish, days) for fish in initial_fishes])
 
-class LanternFish:
-    def __init__(self, initial_value: int = 8) -> None:
-        self.value = initial_value
-    
-    def next_day(self) -> Union[None, 'LanternFish']:
-        self.value -= 1
-        return self._reproduce()
-    
-    def _reproduce(self) -> Union[None, 'LanternFish']:
-        if self.value < 0: 
-            self.value = 6
-            return LanternFish()
-        return None
+def simulate_fish(fish: int, days: int):
+    if fish >= days: return 1 # the fish doesn't have time to reproduce, return itself
+    remaining_days = days - fish - 1
+    return simulate_fish(6, remaining_days) + simulate_fish(8, remaining_days) # reproduces one fish and then the remaining days for itself and the reproduced fish
 
-def simulate(fishes: List[LanternFish], days: int) -> List[LanternFish]:
-    for _day in range(days):
-        new_borns = []
-        for fish in fishes:
-            if new_born := fish.next_day(): new_borns.append(new_born)
-        for new_born in new_borns: fishes.append(new_born)
-    return fishes
-
-def make_fishes(l: List[int]) -> List[LanternFish]:
-    return list(map(lambda x: LanternFish(x), l))
-
-def solve(filename: str = "input", days: int = 80) -> int:
-    fishes = []
+def solve(filename: str = "input", days: int = 256) -> int:
+    values = []
     with open(f"day6/{filename}", 'r') as f:
         line = f.readline().strip()
         values = line.split(',')
         values = [int(value) for value in values]
-        fishes = make_fishes(values)
-    after = simulate(fishes, days)
-    print([a.value for a in after])
-    return len(after)
+    fishes = simulate(values, days)
+    return fishes
 
-
-result = solve()
-print(result)
+if __name__ == "__main__":
+    result = solve("test_data")
+    print(result)
