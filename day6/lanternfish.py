@@ -1,4 +1,5 @@
 from typing import List
+import matplotlib.pyplot as plt
 
 def simulate(initial_values: List[int], days: int = 256, days_to_reproduce: int = 6, days_to_reproduce_first_time: int = 8) -> int:
     fishes = [0] * (days_to_reproduce_first_time + 1)
@@ -24,3 +25,8 @@ def solve(filename: str = "input", days: int = 256) -> int:
 if __name__ == "__main__":
     result = solve()
     print(result)
+    days = [i for i in range(1000)]
+    fishes = [solve(days=day) for day in days]
+    plt.plot(days, fishes)
+    plt.yscale('log')
+    plt.show()
