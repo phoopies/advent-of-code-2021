@@ -1,5 +1,6 @@
-from enum import Enum
-from typing import List, Union
+from typing import List
+from time import time
+# PART 1
 
 # print(
 #     len([e for row in list(
@@ -13,125 +14,112 @@ from typing import List, Union
 #     ) for e in row])
 # )
 
-class Segment(object):
-    count_relations = {
-        4 : 'e',
-        6 : 'b',
-        9 : 'f',
-        7 : ['d', 'g'],
-        8 : ['a', 'c'],
-    }
-    unknown = "?"
+# PART 2
+# Another solution to part 2. I prefer as it's easier to follow and it seems to be a bit faster which is nice.
 
-    def __init__(self) -> None:
-        self.count = 0
-        self._real = Segment.unknown
-        self.solved = False
-
-    @property
-    def real(self) -> Union[str, List[str]]:
-        return self._real
-
-    @real.setter
-    def real(self, s:Union[str, List[str]]) -> None:
-        if isinstance(s, str) and s != Segment.unknown: self.solved = True
-        else: self.solved = False
-        self._real = s
-    
-    def __str__(self) -> str:
-        return f"{self.real} ({self.count}) ({self.solved})"
-    
-    def __add__(self, o: int) -> None:
-        self.count += o
-        self._update_w_count()
-    
-    def _update_w_count(self) -> None:
-        if self.count in Segment.count_relations.keys():
-            self.real = Segment.count_relations[self.count]
-        
-
+# Another way to solve day 8 part 2. 
+# We don't need to know which wire goes where but which number a combination represents.
+# We can determine numbers 1 4 7 and 8 easily as they have a unique number of segments
+# From here we can determine number 9 as it the only six segment number that shares same segments as number 4
+# Same goes for number 0 (compare to 7)
+# Same goes for number 3 (compare to 7, 5 segments) 
+# The last six segment number must be number 6
+# At this point we only need to determine numbers 2 and 5
+# Compared to number 4, 5 has more segments in common than 2. We can use this to determine the last two numbers.
 
 class Display:
-    correct = {
-        'abcefg': 0,
-        'cf' : 1,
-        'acdeg' : 2,
-        'acdfg' : 3,
-        'bcdf' : 4,
-        'abdfg' : 5,
-        'abdefg' : 6,
-        'acf' : 7,
-        'abcdefg' : 8,
-        'abcdfg' : 9
-    }
     a: int = 97
     segments: int = 7
+    unknown: str = "?"
+    number_segments: List[int] = [6, 2, 5, 5, 4, 5, 6, 3, 7, 6] # How many segments each number (index) has
+
     def __init__(self, patterns: List[str]) -> None:
-        self.patterns = patterns
-        self.numbers = {chr(i + Display.a):Segment() for i in range(Display.segments)}
-        self.determine()
+        self.input = patterns
+        self.patterns = [Display.unknown for _ in patterns]
+        self.determine() 
     
     def to_number(self, pattern: str) -> int:
-        s = "".join(sorted([self.numbers[wire].real for wire in pattern]))
-        return Display.correct[s]
+        for i, pat in enumerate(self.patterns):
+            if pat == sorted(pattern): return i
+        return -1
     
     def determine(self):
-        self._determine_counts()
-        self._determine_c()
-        self._determine_a()
-        self._determine_d()
-        self._determine_g()
+        self._determine_w_counts()
+        self._determine_w_comparing(9, 4)
+        self._determine_w_comparing(0, 7)
+        self._determine_w_comparing(3, 7)
+        self._determine_six()
+        self._determine_two_and_five()
+        self.patterns = [sorted(pattern) for pattern in self.patterns]
     
-    def _determine_counts(self) -> None:
-        for pattern in self.patterns:
-            for c in pattern:
-                self.numbers[c] + 1
-
-    def _determine_c(self):
-        n_one = self._get_w_length(2)
-        for wire in n_one:
-            if not self.numbers[wire].solved: 
-                if 'c' in self.numbers[wire].real: self.numbers[wire].real = 'c'
-                else: self.numbers[wire].real = 'f'
-                return
+    def _determine_w_counts(self) -> None:
+        to_determine = [1, 4, 7, 8] # could also get the unique ones from number_segments
+        for t in to_determine:
+            pattern = self._get_w_count(Display.number_segments[t])[0]
+            self.patterns[t] = pattern
     
-    def _determine_a(self):
-        n_one = self._get_w_length(2)
-        n_seven = self._get_w_length(3)
-        for wire in n_seven:
-            if wire not in n_one: 
-                self.numbers[wire].real = 'a'
-                return
-    
-    def _determine_d(self): 
-        n_four = self._get_w_length(4)
-        for wire in n_four: 
-            if not self.numbers[wire].solved:
-                self.numbers[wire].real = 'd'
-                return
-    
-    def _determine_g(self):
-        for segment in self.numbers.values():
-            if not segment.solved: 
-                segment.real = 'g'
+    def _determine_six(self) -> None:
+        segments6 = self._get_w_count(6)
+        for pattern in segments6:
+            if pattern not in self.patterns:
+                self.patterns[6] = pattern
                 return
 
-    def _get_w_length(self, n:int) -> str:
-        return list(filter(lambda p: len(p) == n, self.patterns))[0]
+    def _determine_two_and_five(self) -> None:
+        four = self.patterns[4]
+        fst, snd = self._get_unsolved()
+        in_common_fst = len(set(four).intersection(set(fst)))
+        in_common_snd = len(set(four).intersection(set(snd)))
+        if in_common_fst > in_common_snd: 
+            self.patterns[5] = fst
+            self.patterns[2] = snd
+        else:
+            self.patterns[5] = snd
+            self.patterns[2] = fst
+    
+    def _get_unsolved(self) -> List[str]:
+        unsolved = []
+        for pattern in self.input:
+            if pattern not in self.patterns:
+                unsolved.append(pattern)
+        return unsolved
+
+    def _determine_w_comparing(self, to_determine: int, to_compare_with: int) -> None:
+        segments = Display.number_segments[to_determine]
+        compare = self.patterns[to_compare_with]
+        possible_patterns = self._get_w_count(segments)
+        for pattern in possible_patterns:
+            if pattern in self.patterns: 
+                continue
+            correct = True
+            for c in compare:
+                if c not in pattern:
+                    correct = False
+                    break
+            if correct:
+                self.patterns[to_determine] = pattern
+                return
+
+
+    def _get_w_count(self, n:int) -> List[str]:
+        return list(filter(lambda p: len(p) == n, self.input))
 
 def solve(filename: str = "input"):
     s = 0
     with open(f"day8/{filename}", 'r') as f:
         while line := f.readline().strip():
-            patterns, outputs = [l.split(' ') for l in line.split('|')]
+            patterns, outputs = [l.strip().split(' ') for l in line.split('|')]
             display = Display(patterns)
             value = ""
             for output in outputs:
-                if output == "": continue
                 value += str(display.to_number(output))
             s += int(value)
     return s
         
+print(solve())        
 
-print(solve())
-
+start = time()
+for _ in range(1000):
+    solve()
+end = time()
+print(f"Took {end-start} seconds") # about 5.8 seconds
