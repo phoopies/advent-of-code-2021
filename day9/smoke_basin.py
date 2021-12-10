@@ -32,17 +32,15 @@ class Area:
     def find_largest_basins(self, count: int = 3) -> int:
         border_map = [[ [0,0] for _ in row] for row in self.heightmap]
         i = 1
-        for y in range(len(self.heightmap)): # Mark all independent rows
+        j = -1
+        for y in range(len(self.heightmap)): # Mark all independent rows and columns
             for x in range(len(self.heightmap[y])):
                 if self.heightmap[y][x] == 9: i += 1
                 else: border_map[y][x][0] = i
+                if self.heightmap[x][y] == 9: j -= 1
+                else: border_map[x][y][1] = j
             i += 1
-        i += 1
-        for x in range(len(self.heightmap[0])): # Mark all independent columns
-            for y in range(len(self.heightmap)):
-                if self.heightmap[y][x] == 9: i += 1
-                else: border_map[y][x][1] = i
-            i += 1
+            j -= 1
 
         basins: List[List[set, int]]= [] # area, count
         for row in border_map: # Go through marked rows and columns and combine them
