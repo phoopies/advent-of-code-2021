@@ -43,7 +43,6 @@ class Cave:
 class CaveSystem:
     def __init__(self) -> None:
         self.caves: dict[str, Cave] = {}
-        # self.paths: List[List[Cave]] = []
     
     def add_cave(self, cave: Cave):
         if cave.id in self.caves:
