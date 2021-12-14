@@ -1,6 +1,13 @@
-# Advent of code 2021 [Python]
+# Advent of code 2021 > Python
 
-### Visualization of Smoke basin part 2
+## Visualizations
+### Smoke basin part 2
 For higher resolution video check the [mkv file](day9/visualization.mkv)
 
-![Alt Text](day9/visualization.gif)
+<img src="day9/visualization.gif" width="350" height="350"/>
+
+### Dumbo Octopus
+For higher resolution video check the [mkv file](day11/visualization.mkv)
+
+<img src="day11/visualization.gif" width="350" height="350"/>
+
