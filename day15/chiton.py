@@ -42,7 +42,7 @@ class Cavern:
                         filter(lambda p: self.risks[p[0]][p[1]] != 0, points))
                 if not points:
                     self.risks[y][x] = risk
-                    # changed = True
+                    changed = True
                 else:
                     point = min(points, key=lambda p: self.risks[p[0]][p[1]])
                     new = self.risks[point[0]][point[1]] + risk
@@ -61,9 +61,9 @@ def solve(filename: str = "input") -> int:
     with open(f"day15/{filename}", 'r') as f:
         while line := f.readline().strip():
             risk_map.append([int(v) for v in line])
-    cavern = Cavern(risk_map)
-    cavern.calculate_risks()
+    cavern = Cavern(risk_map, 1)
+    cavern.calculate_risks(True)
     return cavern.lowest_risk()
 
 
-print(solve("test_data"))  # This takes a while
+print(solve())  # This takes a while
