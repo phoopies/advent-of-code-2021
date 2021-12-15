@@ -65,9 +65,4 @@ def solve(filename: str = "input") -> int:
     cavern.calculate_risks(True)
     return cavern.lowest_risk()
 
-from time import time
-
-s = time()
 print(solve())
-e = time()
-print(f"took {e-s} seconds")
