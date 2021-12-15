@@ -61,9 +61,13 @@ def solve(filename: str = "input") -> int:
     with open(f"day15/{filename}", 'r') as f:
         while line := f.readline().strip():
             risk_map.append([int(v) for v in line])
-    cavern = Cavern(risk_map, 1)
+    cavern = Cavern(risk_map, 5)
     cavern.calculate_risks(True)
     return cavern.lowest_risk()
 
+from time import time
 
-print(solve())  # This takes a while
+s = time()
+print(solve())
+e = time()
+print(f"took {e-s} seconds")
