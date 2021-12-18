@@ -1,6 +1,9 @@
-import matplotlib.pyplot as plt 
+import random
+from matplotlib.patches import Rectangle
+import matplotlib.pyplot as plt
 from typing import List, Tuple
 from matplotlib.animation import FuncAnimation, PillowWriter
+
 
 class Trench:
     def __init__(self, x1: int, y1: int, x2: int, y2: int) -> None:
@@ -108,7 +111,7 @@ class Launcher:
         probe = Probe()
         for x in range(min_x, max_x+1):
             for y in range(min_y, max_y+1):
-                success, projectory = probe.shoot_until(x,y, self.target)
+                success, projectory = probe.shoot_until(x, y, self.target)
                 if success:
                     shots.append(projectory)
                 probe.reset()
@@ -120,10 +123,11 @@ class Launcher:
         print(projectory)
         return any([point in self.target for point in projectory])
 
-import random
+
 def new_color():
-    r,g,b = random.random(),random.random(),random.random()
-    return [r,g,b]
+    r, g, b = random.random(), random.random(), random.random()
+    return [r, g, b]
+
 
 fig, ax = plt.subplots()
 xdata, ydata = [], []
@@ -131,20 +135,22 @@ ln, = plt.plot([], [], 'o')
 
 test_target = Trench(20, -10, 30, -5)
 real_target = Trench(207, -115, 263, -63)
-target = real_target
- 
-from matplotlib.patches import Rectangle
+target = test_target
+
 rectangle_anchor = (min(target.x), min(target.y))
 rectangle_width = max(target.x) - min(target.x)
 rectangle_height = max(target.y) - min(target.y)
-ax.add_patch(Rectangle(rectangle_anchor, rectangle_width, rectangle_height ,color="green", alpha=.20))
+ax.add_patch(Rectangle(rectangle_anchor, rectangle_width,
+             rectangle_height, color="green", alpha=.20))
 
 launcher = Launcher(target)
 shots = launcher.possible_shots()
-print(len(shots))
+
 xs = [x for shot in shots for [x, _y] in shot]
 ys = [y for shot in shots for [_x, y] in shot]
 frame = list(zip(xs, ys))
+
+
 def update(i):
     global ln, xdata, ydata, ax, frame
     x, y = frame[i]
@@ -155,15 +161,16 @@ def update(i):
     xdata.append(x)
     ydata.append(y)
     ln.set_data(xdata, ydata)
+    return ln,
 
-    return ln, 
 
 def init():
     ax.set_xlim(-3, max(target.x) + 3)
     ax.set_ylim(min(target.y)-3, launcher.high_shot()+3)
     return ln,
 
-ani = FuncAnimation(fig, update, frames=len(xs),
-            init_func=init, interval=3, blit=True, repeat=True)
 
-ani.save('day17/visualization.gif', dpi=300, fps=12)
+ani = FuncAnimation(fig, update, frames=len(xs),
+                    init_func=init, interval=1, blit=True, repeat=True)
+
+ani.save('day17/visualization.gif', fps=24)
