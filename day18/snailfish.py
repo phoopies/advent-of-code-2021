@@ -3,6 +3,7 @@ from math import floor, ceil
 import json
 from copy import deepcopy
 
+
 class SnailfishNumber:
     def __init__(self) -> None:
         self.parent: 'SnailfishNumber' = None
@@ -46,6 +47,7 @@ class SnailfishRegular(SnailfishNumber):
     def magnitude(self) -> int:
         return self.number
 
+
 class SnailfishPair(SnailfishNumber):
     def __init__(self, left: Union[SnailfishNumber, int], right: Union[SnailfishNumber, int]) -> None:
         super().__init__()
@@ -66,19 +68,19 @@ class SnailfishPair(SnailfishNumber):
         return self.left.get_left_regular()
 
     def explode(self, deep: int = 0, from_left: bool = False) -> bool:
-        if deep >= 4: 
+        if deep >= 4:
             parentl = self.parent
             left = None
             while parentl is not None and parentl.get_left_regular() == self.left:
                 parentl = parentl.parent
-            if parentl != None:       
+            if parentl != None:
                 left = parentl.left.get_right_regular()
 
             parentr = self.parent
             right = None
             while parentr is not None and parentr.get_right_regular() == self.right:
                 parentr = parentr.parent
-            if parentr != None:       
+            if parentr != None:
                 right = parentr.right.get_left_regular()
             if left != None:
                 left.number += self.left.number
@@ -103,16 +105,17 @@ class SnailfishPair(SnailfishNumber):
             pass
         if self.split():
             self.reduce()
-    
+
     def magnitude(self) -> int:
-        return 3*(self.left.magnitude()) + 2 *self.right.magnitude()
+        return 3*(self.left.magnitude()) + 2 * self.right.magnitude()
 
     def __str__(self) -> str:
         return f"[{str(self.left)}, {str(self.right)}]"
 
 
 def create_snailfish(ls) -> SnailfishNumber:
-    if isinstance(ls, int): return SnailfishRegular(ls)
+    if isinstance(ls, int):
+        return SnailfishRegular(ls)
     return SnailfishPair(create_snailfish(ls[0]), create_snailfish(ls[1]))
 
 
@@ -121,11 +124,12 @@ def solve(filename: str = "input") -> Tuple[int, int]:
     with open(f"day18/{filename}", 'r') as f:
         while line := f.readline().strip():
             sfs.append(create_snailfish(json.loads(line)))
-    
+
     largest = 0
     for x, sf1 in enumerate(sfs):
         for y, sf2 in enumerate(sfs):
-            if x == y: continue
+            if x == y:
+                continue
             sf1_c = deepcopy(sf1)
             sf2_c = deepcopy(sf2)
             sf = (sf1_c+sf2_c)
@@ -140,6 +144,7 @@ def solve(filename: str = "input") -> Tuple[int, int]:
         sf.reduce()
 
     return sf.magnitude(), largest
+
 
 if __name__ == "__main__":
     testing = True
@@ -168,15 +173,15 @@ if __name__ == "__main__":
         print(sf3)
 
         sf4 = SnailfishPair(
-            SnailfishPair(1,2),
+            SnailfishPair(1, 2),
             SnailfishPair(
-                SnailfishPair(3,4),5
+                SnailfishPair(3, 4), 5
             )
         )
 
         print(sf4.magnitude())
 
-        sf5 = create_snailfish([[[[0,7],4],[[7,8],[6,0]]],[8,1]])
+        sf5 = create_snailfish([[[[0, 7], 4], [[7, 8], [6, 0]]], [8, 1]])
         print(sf5.magnitude())
 
         print(solve("test_data"))
